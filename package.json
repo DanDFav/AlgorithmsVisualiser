@@ -1,0 +1,20 @@
+{
+  "name": "algorithmsvisualiser",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "tsc && electron .",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/electron": "^1.6.10",
+    "@types/node": "^20.14.2",
+    "electron": "^30.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
