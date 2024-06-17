@@ -60,10 +60,10 @@ function swapFunc(array: number[], a: number, b: number): void {
 }
 
 function generateSet() {
-  let set = new Array(8);
+  let set = new Array(60);
 
   for (let i = 0; i < set.length; i++) {
-    set[i] = Math.floor(Math.random() * 100);
+    set[i] = Math.floor(Math.random() * 99 + 1);
   }
   //   let set = [10, 80, 30, 90, 40, 50];
   //   let set = [35, 85, 73, 94, 31, 73, 15, 12, 56, 20, 93, 54];
@@ -81,41 +81,11 @@ function drawArray(arr: number[]): void {
       const id = "index";
       square.className = name;
       square.id = id;
+      square.style.height = `${value * 3}px`;
       square.textContent = value.toString();
       container.appendChild(square);
       count++;
     });
-  }
-}
-
-class nodeList {
-  head: node;
-  current: node;
-  drawNode: node;
-  constructor(head: node) {
-    this.head = head;
-    this.current = head;
-    this.drawNode = head;
-  }
-
-  add(node: node) {
-    this.current.next = node;
-    this.current = this.current.next;
-  }
-
-  print(node: node | null) {
-    if (!node) {
-      return;
-    }
-    let action = node.action;
-    // sendToMain(action);
-    if (node instanceof check) {
-      for (let i = 0; i < node.children.length; i++) {
-        this.print(node.children[i]);
-      }
-    }
-
-    this.print(node.next);
   }
 }
 
@@ -134,7 +104,7 @@ function resetColors() {
 
 function handleKeyDown(event: KeyboardEvent): void {
   if (event.key == " ") {
-    const intervalId = setInterval(displaySwaps, 500);
+    const intervalId = setInterval(displaySwaps, 50);
     setTimeout(() => {
       clearInterval(intervalId);
       console.log("Stopped the interval");
@@ -302,5 +272,36 @@ class check extends node {
 }
 
 class partition {}
+
+class nodeList {
+  head: node;
+  current: node;
+  drawNode: node;
+  constructor(head: node) {
+    this.head = head;
+    this.current = head;
+    this.drawNode = head;
+  }
+
+  add(node: node) {
+    this.current.next = node;
+    this.current = this.current.next;
+  }
+
+  print(node: node | null) {
+    if (!node) {
+      return;
+    }
+    let action = node.action;
+    // sendToMain(action);
+    if (node instanceof check) {
+      for (let i = 0; i < node.children.length; i++) {
+        this.print(node.children[i]);
+      }
+    }
+
+    this.print(node.next);
+  }
+}
 
 document.addEventListener("keydown", handleKeyDown);

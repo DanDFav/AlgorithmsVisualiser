@@ -4,22 +4,24 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
+    background-color: black;
 }
 
 .container {
     display: flex;
-    /* gap: 10px; */
-}
+    align-items: flex-end; /* Align items to the bottom */
+    height: 500px; /* Adjust the height of the container as needed */
+  }
 
-.square {
-    width: 50px;
-    height: 50px;
+  .square {
+    width: 20px; /* Adjust the width of the squares as needed */
+    margin: 2px;
+    background-color: lightblue;
+    text-align: center;
     display: flex;
+    align-items: flex-end; /* Align text to the bottom */
     justify-content: center;
-    align-items: center;
-    border: 1px solid black;
-    font-size: 16px;
-}
+  }
 
 .textBox {
     position: fixed;
