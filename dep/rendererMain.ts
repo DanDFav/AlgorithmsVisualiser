@@ -40,6 +40,10 @@ class Partition {
 
   partition(p_ap: actionPartition | null): [number, actionPartition] {
     let ap = new actionPartition(this, part++, p_ap);
+    if (p_ap) {
+      p_ap.childPart?.push(ap);
+    }
+
     actions.buildChain(ap);
     let array = this.array;
     let high = this.high;
@@ -81,7 +85,7 @@ class actionList {
   buildChain(actionNode: actionNode) {
     if (this.current) {
       this.current.child = actionNode;
-      this.sendToMain();
+      //this.sendToMain();
       this.current = this.current.child;
     } else {
       console.log("Cannot Set Child: Current is null");
@@ -93,30 +97,30 @@ class actionList {
     this.current = this.head;
   }
 
-  sendToMain() {
-    if (this.current instanceof actionSwap) {
-      let type = this.current.action;
-      let values = this.current.data;
-      window.ipcRenderer.send("actionSwap", {
-        type,
-        values,
-      });
-    } else if (this.current instanceof actionPartition) {
-      let type = this.current.action;
-      let values = this.current.data;
-      let product = this.current.product;
-      window.ipcRenderer.send("actionPartition", {
-        type,
-        values,
-        product,
-      });
-    } else if (this.current instanceof actionStart) {
-      let type = this.current.action;
-      window.ipcRenderer.send("actionStart", {
-        type,
-      });
-    }
-  }
+  // sendToMain() {
+  //   if (this.current instanceof actionSwap) {
+  //     let type = this.current.action;
+  //     let values = this.current.data;
+  //     window.ipcRenderer.send("actionSwap", {
+  //       type,
+  //       values,
+  //     });
+  //   } else if (this.current instanceof actionPartition) {
+  //     let type = this.current.action;
+  //     let values = this.current.data;
+  //     let product = this.current.product;
+  //     window.ipcRenderer.send("actionPartition", {
+  //       type,
+  //       values,
+  //       product,
+  //     });
+  //   } else if (this.current instanceof actionStart) {
+  //     let type = this.current.action;
+  //     window.ipcRenderer.send("actionStart", {
+  //       type,
+  //     });
+  //   }
+  // }
 
   printActions() {
     this.current = this.head;
@@ -182,6 +186,7 @@ class actionPartition extends actionNode {
   name: number;
   parentName: number | null;
   parentPart: actionPartition | null;
+  childPart: actionPartition[] | null;
   constructor(
     node: Partition,
     name: number,
@@ -197,6 +202,7 @@ class actionPartition extends actionNode {
     } else {
       this.parentName = null;
     }
+    this.childPart = [];
   }
 }
 
@@ -249,7 +255,9 @@ function drawArray(arr: number[]): void {
     arr.forEach((value) => {
       const square = document.createElement("div");
       const name = "square " + count;
+      const id = "index";
       square.className = name;
+      square.id = id;
       square.textContent = value.toString();
       container.appendChild(square);
       count++;
@@ -258,39 +266,100 @@ function drawArray(arr: number[]): void {
 }
 
 function generateSet() {
-  let set = new Array(12);
+  // let set = new Array(6);
 
-  for (let i = 0; i < set.length; i++) {
-    set[i] = Math.floor(Math.random() * 100);
-  }
-
+  // for (let i = 0; i < set.length; i++) {
+  //   set[i] = Math.floor(Math.random() * 100);
+  // }
+  // let set = [10, 80, 30, 90, 40, 50, 70];
+  let set = [81, 11, 27, 64, 79, 48];
   drawArray(set);
   return set;
 }
 
 function displaySwaps() {
-  actions.next();
-  if (actions.current?.originData) {
-    drawArray(actions.current?.originData);
-  }
-
-  console.log(actions.current);
+  console.log(swapDrawState);
   if (actions.current instanceof actionSwap) {
     const currentNode: actionSwap = actions.current;
-    highLightSquares(currentNode);
+    if (swapDrawState == 0) {
+      if (actions.current) {
+        updateTextBox(actions.current?.action);
+      }
+    }
+
+    if (swapDrawState == 2) {
+      actions.next();
+      swapDrawState = 0;
+    } else {
+      highLightSquares(currentNode);
+    }
+  } else if (actions.current instanceof actionPartition) {
+    const currentNode: actionPartition = actions.current;
+
+    updateTextBox(currentNode.action);
+
+    actions.next();
+    drawArray(currentNode.node.range);
+  } else {
+    actions.next();
   }
 }
 
+function resetColors() {
+  const squares = document.getElementsByClassName("square");
+  for (let i = 0; i < squares.length; i++) {
+    (squares[i] as HTMLElement).style.backgroundColor = "white";
+  }
+}
+
+let swapDrawState = 0;
+
 function highLightSquares(currentNode: actionSwap) {
-  console.log(currentNode.data);
+  let colour = "red";
+  if (swapDrawState == 1) {
+    colour = "green";
+    if (actions.current) {
+      drawArray(actions.current?.product);
+    }
+  }
   const one: number = currentNode.data[0];
   const two: number = currentNode.data[1];
-  //const array: number[] = currentNode.
+  const arr: number[] = currentNode.node.range;
+
+  const oneIdx = arr.indexOf(one);
+  const twoIdx = arr.indexOf(two);
+
+  const nameOne = "square " + oneIdx;
+  const nameTwo = "square " + twoIdx;
+
+  const squareOne = document.getElementsByClassName(nameOne)[0] as HTMLElement;
+  const squareTwo = document.getElementsByClassName(nameTwo)[0] as HTMLElement;
+
+  if (squareOne) {
+    squareOne.style.backgroundColor = colour;
+  }
+
+  if (squareTwo) {
+    squareTwo.style.backgroundColor = colour;
+  }
+
+  swapDrawState++;
 }
 
 function handleKeyDown(event: KeyboardEvent): void {
   if (event.key == " ") {
+    resetColors();
     displaySwaps();
+  }
+}
+
+function updateTextBox(message: string) {
+  const textBox = document.getElementById("textBox");
+  if (textBox) {
+    const newMessage = document.createElement("div");
+    newMessage.textContent = message;
+    textBox.appendChild(newMessage);
+    textBox.scrollTop = textBox.scrollHeight; // Scroll to the bottom
   }
 }
 

@@ -77,5 +77,10 @@ ipcMain.on('StateOfArray', (_, data)=>{
     console.log("----------")
 })
 
+ipcMain.on('output', (_, data)=>{
+    let action = data.action
+    console.log(action)
+})
+
 
 
