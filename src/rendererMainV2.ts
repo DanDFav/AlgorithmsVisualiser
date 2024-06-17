@@ -1,9 +1,8 @@
 window.addEventListener("DOMContentLoaded", async () => {
   let array = generateSet();
   drawArray(array);
-  actions = new nodeList(new node("start"));
+  actions = new nodeList(new node("start", []));
   quickSort(array, 0, array.length - 1);
-  actions.print(actions.head);
 });
 
 let actions: nodeList;
@@ -38,7 +37,6 @@ function partitionFunc(array: number[], low: number, high: number): number {
       i++;
       const swapNode = new swap(range, i);
       swapNode.swap(array, i, j);
-      //   compare.children.push(swapNode);
       actions.add(swapNode);
     }
   }
@@ -65,8 +63,6 @@ function generateSet() {
   for (let i = 0; i < set.length; i++) {
     set[i] = Math.floor(Math.random() * 99 + 1);
   }
-  //   let set = [10, 80, 30, 90, 40, 50];
-  //   let set = [35, 85, 73, 94, 31, 73, 15, 12, 56, 20, 93, 54];
   return set;
 }
 
@@ -107,7 +103,6 @@ function handleKeyDown(event: KeyboardEvent): void {
     const intervalId = setInterval(displaySwaps, 50);
     setTimeout(() => {
       clearInterval(intervalId);
-      console.log("Stopped the interval");
     }, 10000000);
     // displaySwaps();
   }
@@ -121,19 +116,17 @@ function displaySwaps() {
 
   // If our current node is the start node, we can just skip
   let current: node | null = actions.drawNode;
-  console.log(current);
   if (current.action == "start" && current.next) {
     actions.drawNode = current.next;
   } else if (current instanceof check) {
-    drawArray(current.data);
+    drawArray(current.originalData);
 
     for (let i = 0; i < current.range[0]; i++) {
       highLightIndex(i, "grey");
     }
 
     for (let i = current.range[0]; i <= current.sorted; i++) {
-      console.log(i);
-      highLightIndex(i, "aqua");
+      highLightIndex(i, "lightgreen");
     }
 
     highLightIndex(current.pivotIdx, "red");
@@ -143,7 +136,7 @@ function displaySwaps() {
       highLightIndex(current.valueIdx, "yellow");
     }
 
-    for (let i = current.range[1] + 1; i < current.data.length; i++) {
+    for (let i = current.range[1] + 1; i < current.originalData.length; i++) {
       highLightIndex(i, "grey");
     }
 
@@ -158,14 +151,13 @@ function displaySwaps() {
     }
 
     for (let i = current.range[0]; i <= current.sorted; i++) {
-      console.log(i);
-      highLightIndex(i, "aqua");
+      highLightIndex(i, "lightgreen");
     }
 
-    highLightIndex(current.swappingIdx[0], "green");
-    highLightIndex(current.swappingIdx[1], "green");
+    highLightIndex(current.swappingIdx[0], "red");
+    highLightIndex(current.swappingIdx[1], "red");
 
-    for (let i = current.range[1] + 1; i < current.orginialData.length; i++) {
+    for (let i = current.range[1] + 1; i < current.originalData.length; i++) {
       highLightIndex(i, "grey");
     }
 
@@ -176,13 +168,13 @@ function displaySwaps() {
   if (!current.next && current instanceof swap) {
     drawArray(current.product);
     for (let i = 0; i < current.product.length; i++) {
-      highLightIndex(i, "aqua");
+      highLightIndex(i, "lightgreen");
     }
   }
   if (!current.next && current instanceof check) {
-    drawArray(current.data);
-    for (let i = 0; i < current.data.length; i++) {
-      highLightIndex(i, "aqua");
+    drawArray(current.originalData);
+    for (let i = 0; i < current.originalData.length; i++) {
+      highLightIndex(i, "lightgreen");
     }
   }
 }
@@ -196,28 +188,28 @@ function highLightIndex(value: number, colour: string) {
 class node {
   action: string;
   next: node | null;
-  constructor(action: string) {
+  originalData: number[] = [];
+  range: number[];
+  constructor(action: string, range: number[]) {
     this.action = action;
     this.next = null;
+    this.range = range;
   }
 }
 
 class swap extends node {
   product: number[] = [];
-  orginialData: number[] = [];
   swapping: number[] = [];
   swappingIdx: number[] = [];
   pivot: boolean = false;
-  range: number[];
   sorted: number;
   constructor(range: number[], sorted: number) {
-    super("swap");
-    this.range = range;
+    super("swap", range);
     this.sorted = sorted;
   }
 
   swap(array: number[], a: number, b: number) {
-    this.orginialData = array.slice(0);
+    this.originalData = array.slice(0);
 
     this.swapping.push(array[a]);
     this.swapping.push(array[b]);
@@ -238,9 +230,7 @@ class check extends node {
   valueIdx: number;
   next: swap | null;
   children: node[] = [];
-  data: number[];
   state: boolean = false;
-  range: number[];
   sorted: number;
   constructor(
     data: number[],
@@ -251,14 +241,13 @@ class check extends node {
     range: number[],
     sorted: number
   ) {
-    super("check");
-    this.data = data;
+    super("check", range);
+    this.originalData = data;
     this.pivot = pivot;
     this.value = value;
     this.pivotIdx = pivotIdx;
     this.valueIdx = valueIdx;
     this.next = null;
-    this.range = range;
     this.sorted = sorted;
   }
 
