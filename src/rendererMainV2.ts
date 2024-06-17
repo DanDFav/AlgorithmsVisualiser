@@ -1,11 +1,11 @@
 window.addEventListener("DOMContentLoaded", async () => {
-  let array = generateSet();
   drawArray(array);
   actions = new nodeList(new node("start", []));
   quickSort(array, 0, array.length - 1);
   actions.print(actions.head);
 });
 
+let array = generateSet();
 let actions: nodeList;
 
 function quickSort(array: number[], low: number, high: number): void {
@@ -58,7 +58,7 @@ function swapFunc(array: number[], a: number, b: number): void {
 }
 
 function generateSet() {
-  let set = new Array(100);
+  let set = new Array(150);
 
   for (let i = 0; i < set.length; i++) {
     set[i] = Math.floor(Math.random() * 99 + 1);
@@ -99,12 +99,13 @@ function resetColors() {
 
 function handleKeyDown(event: KeyboardEvent): void {
   if (event.key == " ") {
-    const intervalId = setInterval(displaySwaps, 50);
+    const intervalId = setInterval(displaySwapsRainbow, 20);
     setTimeout(() => {
       clearInterval(intervalId);
     }, 10000000);
-
     //displaySwaps();
+
+    //displaySwapsRainbow();
   }
 }
 
@@ -185,6 +186,48 @@ function displaySwaps() {
     drawArray(current.originalData);
     for (let i = 0; i < current.originalData.length; i++) {
       highLightIndex(i, "lightgreen");
+    }
+  }
+}
+
+function displayRainbow(index: number, data: number[]) {
+  // Ensure the number is within the range 1-100
+  let number = data[index];
+  // Map the number to a hue value between 300 (violet) and 0 (red)
+  const hue = 300 - ((number - 1) * 300) / 99;
+  const name = "square " + index;
+  const square = document.getElementsByClassName(name)[0] as HTMLElement;
+  square.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+}
+
+function displaySwapsRainbow() {
+  if (!actions.drawNode) {
+    return;
+  }
+
+  // If our current node is the start node, we can just skip
+  let current: node | null = actions.drawNode;
+
+  if (current.action == "start" && current.next) {
+    actions.drawNode = current.next;
+  } else if (current instanceof check) {
+    drawArray(current.originalData);
+    positionRedLine(current.pivotIdx); // Position the red line
+    for (let i = 0; i < current.originalData.length; i++) {
+      displayRainbow(i, current.originalData);
+    }
+    if (current.next) {
+      actions.drawNode = current.next;
+    }
+  } else if (current instanceof swap) {
+    drawArray(current.product);
+
+    for (let i = 0; i < current.originalData.length; i++) {
+      displayRainbow(i, current.originalData);
+    }
+
+    if (current.next) {
+      actions.drawNode = current.next;
     }
   }
 }
