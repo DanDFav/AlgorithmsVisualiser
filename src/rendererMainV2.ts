@@ -58,7 +58,7 @@ function swapFunc(array: number[], a: number, b: number): void {
 }
 
 function generateSet() {
-  let set = new Array(60);
+  let set = new Array(100);
 
   for (let i = 0; i < set.length; i++) {
     set[i] = Math.floor(Math.random() * 99 + 1);
@@ -99,17 +99,16 @@ function resetColors() {
 
 function handleKeyDown(event: KeyboardEvent): void {
   if (event.key == " ") {
-    // const intervalId = setInterval(displaySwaps, 500);
-    // setTimeout(() => {
-    //   clearInterval(intervalId);
-    // }, 10000000);
+    const intervalId = setInterval(displaySwaps, 50);
+    setTimeout(() => {
+      clearInterval(intervalId);
+    }, 10000000);
 
-    displaySwaps();
+    //displaySwaps();
   }
 }
 
 function displaySwaps() {
-  resetColors();
   if (!actions.drawNode) {
     return;
   }
@@ -131,14 +130,15 @@ function displaySwaps() {
       }
 
       if (i == current.pivotIdx) {
-        highLightIndex(current.pivotIdx, "red");
+        highLightIndex(i, "red");
+        positionRedLine(current.pivotIdx); // Position the red line
       }
 
       if (i == current.valueIdx) {
         if (current.state) {
-          highLightIndex(current.valueIdx, "red");
+          highLightIndex(i, "red");
         } else {
-          highLightIndex(current.valueIdx, "yellow");
+          highLightIndex(i, "yellow");
         }
       }
 
@@ -163,6 +163,7 @@ function displaySwaps() {
 
       if (i == current.swappingIdx[0] || i == current.swappingIdx[1]) {
         highLightIndex(current.swappingIdx[0], "red");
+        highLightIndex(current.swappingIdx[1], "red");
       }
 
       if (i > current.range[1]) {
@@ -185,6 +186,18 @@ function displaySwaps() {
     for (let i = 0; i < current.originalData.length; i++) {
       highLightIndex(i, "lightgreen");
     }
+  }
+}
+
+function positionRedLine(index: number) {
+  const square = document.getElementsByClassName(
+    "square " + index
+  )[0] as HTMLElement;
+  if (square) {
+    const redLine = document.getElementById("red-line") as HTMLElement;
+    const topPosition = square.offsetTop;
+    redLine.style.top = `${topPosition}px`;
+    redLine.style.opacity = "0.5";
   }
 }
 
