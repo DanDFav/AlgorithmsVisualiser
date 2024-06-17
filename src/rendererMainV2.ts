@@ -3,6 +3,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   drawArray(array);
   actions = new nodeList(new node("start", []));
   quickSort(array, 0, array.length - 1);
+  actions.print(actions.head);
 });
 
 let actions: nodeList;
@@ -44,7 +45,6 @@ function partitionFunc(array: number[], low: number, high: number): number {
   if (array[i + 1] != array[high]) {
     const swapNode = new swap(range, i);
     swapNode.swap(array, i + 1, high);
-    swapNode.pivot = true;
     actions.add(swapNode);
   }
 
@@ -78,7 +78,6 @@ function drawArray(arr: number[]): void {
       square.className = name;
       square.id = id;
       square.style.height = `${value * 3}px`;
-      square.textContent = value.toString();
       container.appendChild(square);
       count++;
     });
@@ -100,11 +99,12 @@ function resetColors() {
 
 function handleKeyDown(event: KeyboardEvent): void {
   if (event.key == " ") {
-    const intervalId = setInterval(displaySwaps, 50);
-    setTimeout(() => {
-      clearInterval(intervalId);
-    }, 10000000);
-    // displaySwaps();
+    // const intervalId = setInterval(displaySwaps, 500);
+    // setTimeout(() => {
+    //   clearInterval(intervalId);
+    // }, 10000000);
+
+    displaySwaps();
   }
 }
 
@@ -121,50 +121,59 @@ function displaySwaps() {
   } else if (current instanceof check) {
     drawArray(current.originalData);
 
-    for (let i = 0; i < current.range[0]; i++) {
-      highLightIndex(i, "grey");
-    }
+    for (let i = 0; i < current.originalData.length; i++) {
+      if (i < current.range[0]) {
+        highLightIndex(i, "grey");
+      }
 
-    for (let i = current.range[0]; i <= current.sorted; i++) {
-      highLightIndex(i, "lightgreen");
-    }
+      if (i >= current.range[0] && i <= current.sorted) {
+        highLightIndex(i, "lightgreen");
+      }
 
-    highLightIndex(current.pivotIdx, "red");
-    if (current.state) {
-      highLightIndex(current.valueIdx, "red");
-    } else {
-      highLightIndex(current.valueIdx, "yellow");
-    }
+      if (i == current.pivotIdx) {
+        highLightIndex(current.pivotIdx, "red");
+      }
 
-    for (let i = current.range[1] + 1; i < current.originalData.length; i++) {
-      highLightIndex(i, "grey");
-    }
+      if (i == current.valueIdx) {
+        if (current.state) {
+          highLightIndex(current.valueIdx, "red");
+        } else {
+          highLightIndex(current.valueIdx, "yellow");
+        }
+      }
 
+      if (i >= current.range[1] + 1) {
+        highLightIndex(i, "grey");
+      }
+    }
     if (current.next) {
       actions.drawNode = current.next;
     }
   } else if (current instanceof swap) {
     drawArray(current.product);
 
-    for (let i = 0; i < current.range[0]; i++) {
-      highLightIndex(i, "grey");
+    for (let i = 0; i < current.originalData.length; i++) {
+      if (i < current.range[0]) {
+        highLightIndex(i, "grey");
+      }
+
+      if (i >= current.range[0] && i <= current.sorted) {
+        highLightIndex(i, "lightgreen");
+      }
+
+      if (i == current.swappingIdx[0] || i == current.swappingIdx[1]) {
+        highLightIndex(current.swappingIdx[0], "red");
+      }
+
+      if (i > current.range[1]) {
+        highLightIndex(i, "grey");
+      }
     }
-
-    for (let i = current.range[0]; i <= current.sorted; i++) {
-      highLightIndex(i, "lightgreen");
-    }
-
-    highLightIndex(current.swappingIdx[0], "red");
-    highLightIndex(current.swappingIdx[1], "red");
-
-    for (let i = current.range[1] + 1; i < current.originalData.length; i++) {
-      highLightIndex(i, "grey");
-    }
-
     if (current.next) {
       actions.drawNode = current.next;
     }
   }
+
   if (!current.next && current instanceof swap) {
     drawArray(current.product);
     for (let i = 0; i < current.product.length; i++) {
@@ -201,7 +210,6 @@ class swap extends node {
   product: number[] = [];
   swapping: number[] = [];
   swappingIdx: number[] = [];
-  pivot: boolean = false;
   sorted: number;
   constructor(range: number[], sorted: number) {
     super("swap", range);
@@ -229,7 +237,6 @@ class check extends node {
   pivotIdx: number;
   valueIdx: number;
   next: swap | null;
-  children: node[] = [];
   state: boolean = false;
   sorted: number;
   constructor(
@@ -281,14 +288,7 @@ class nodeList {
     if (!node) {
       return;
     }
-    let action = node.action;
-    // sendToMain(action);
-    if (node instanceof check) {
-      for (let i = 0; i < node.children.length; i++) {
-        this.print(node.children[i]);
-      }
-    }
-
+    console.log(node);
     this.print(node.next);
   }
 }

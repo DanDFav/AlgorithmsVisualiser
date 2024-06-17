@@ -9,19 +9,21 @@ body {
 
 .container {
     display: flex;
-    align-items: flex-end; /* Align items to the bottom */
-    height: 500px; /* Adjust the height of the container as needed */
+    align-items: flex-end; 
+    height: 500px; 
+    width: 70vw; 
+    height: 50vh; 
   }
 
-  .square {
-    width: 20px; /* Adjust the width of the squares as needed */
-    margin: 2px;
-    background-color: lightblue;
-    text-align: center;
-    display: flex;
-    align-items: flex-end; /* Align text to the bottom */
-    justify-content: center;
-  }
+.square {
+width: 20px; 
+margin: 2px;
+background-color: lightblue;
+text-align: center;
+display: flex;
+align-items: flex-end; 
+justify-content: center;
+}
 
 .textBox {
     position: fixed;
